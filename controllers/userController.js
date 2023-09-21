@@ -7,6 +7,7 @@ const UserHasRole = require("../models/userHasRoleModel");
 const Role = require("../models/roleModel");
 const Permission = require("../models/permissionModel");
 const RoleHasPermission = require("../models/roleHasPermissionModel");
+const upload = require("../middleware/uploadFile");
 
 // @desc Register a user
 // @route POST /api/users/register
@@ -26,15 +27,22 @@ const userRegister = asyncHandler(async (req, res) => {
     }
     // Hash Password
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(hashedPassword);
+
+    // Extract the uploaded file path if it exists
+    let profilePicturePath = null;
+    if (req.files && req.files.length > 0) {
+        profilePicturePath = req.files[0].path;
+
+    }
     const user = await User.create({
         username,
         email,
         password: hashedPassword,
+        profile_picture: profilePicturePath
     });
 
     if (user) {
-        res.status(201).json({ _id: user.id, email: user.email });
+        res.status(201).json({ _id: user.id, email: user.email, picture: user.profile_picture });
         return;
     }
     // res.json({ message: "register user" });

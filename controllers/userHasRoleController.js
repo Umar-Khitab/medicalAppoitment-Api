@@ -25,7 +25,7 @@ const assignRoles = asyncHandler(async (req, res) => {
         const insertroles = await UserHasRole.insertMany(newRoles);
 
 
-        const userRoles = await UserHasRole.find({});
+        const userRoles = await UserHasRole.find({ user_id: userId}).populate("role_id");
 
         res.status(200).json({ userHasRoles: userRoles });
 

@@ -3,11 +3,13 @@ const { userRegister, loginUser, logoutUser, currentUser, allUsers, getUserPermi
 const { assignRoles } = require("../controllers/userHasRoleController");
 const validateToken = require("../middleware/validateTokenHandler");
 const hasRole = require("../middleware/validateRoleHandler");
+const upload = require("../middleware/uploadFile");
+
 const router = express.Router();
 
 
 
-router.post("/register", userRegister);
+router.post("/register", upload.single("file"), userRegister);
 
 router.post("/login", loginUser);
 router.post("/logout", validateToken, logoutUser);
