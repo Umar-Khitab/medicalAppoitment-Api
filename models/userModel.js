@@ -10,11 +10,6 @@ const userSchema = mongoose.Schema({
         required: [true, "Please provide your email!"],
         unique: [true, "Email Already taken"]
     },
-    role_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "Role",
-    },
     password: {
         type: String,
         required: [true, "Please provide your password!"],

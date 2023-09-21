@@ -3,7 +3,10 @@ const User = require("../models/userModel");
 const RevokeToken = require("../models/revokedTokenModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const UserHasRole = require("../models/userHasRoleModel");
+const Role = require("../models/roleModel");
+const Permission = require("../models/permissionModel");
+const RoleHasPermission = require("../models/roleHasPermissionModel");
 
 // @desc Register a user
 // @route POST /api/users/register
@@ -117,6 +120,54 @@ const currentUser = asyncHandler(async (req, res) => {
     res.json({ message: "logged in user", user: req.user });
 });
 
+
+// @desc get Users Roles
+// @route get /api/users/roles/:id
+// @access private
+
+const getUserRoles = asyncHandler(async (req, res) => {
+    try {
+        const userId = req.params.id;
+        let userRoles = await UserHasRole.find({ user_id: userId }).select(["role_id -_id"]).populate("role_id");
+
+        const roles = userRoles.map(role => role.role_id);
+        res.status(200).json({ roles });
+
+    } catch (err) {
+        console.log(err);
+    }
+});
+
+
+// @desc Get User Permissions
+// @route GET /api/users/permissions/:id
+// @access private
+
+
+const getUserPermissions = asyncHandler(async (req, res) => {
+    const userId = req.params.id; // Assuming you have the user's ID available in req.user
+
+    // Step 1: Retrieve the roles assigned to the user
+    const userRoles = await UserHasRole.find({ user_id: userId }).select('role_id');
+
+    // Step 2: Find the permissions associated with those roles
+    const roleIds = userRoles.map(userRole => userRole.role_id);
+
+    // res.status(200).json({ ids: roleIds});
+    const rolePermissions = await RoleHasPermission
+        .find({ role_id: { $in: roleIds } })
+        .select('permission_id -_id') // Exclude _id field
+        .populate('permission_id');
+
+    const permissions = rolePermissions.map(rolePermission => rolePermission.permission_id);
+
+    // Now 'permissions' contains the list of permissions associated with the user's roles
+    res.status(200).json({ permissions });
+
+});
+
+
+
 // @desc all users Info
 // @route GET /api/users/current
 // @access private
@@ -133,4 +184,4 @@ const allUsers = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { userRegister, loginUser, logoutUser, currentUser, allUsers };
+module.exports = { userRegister, loginUser, logoutUser, currentUser, allUsers, getUserPermissions, getUserRoles };
