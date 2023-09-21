@@ -1,16 +1,26 @@
 const asyncHandler = require("express-async-handler");
+const UserHasRole = require("../models/userHasRoleModel");
 
 
-const authRole = (role) => {
-    return (req, res, next) => {
+const hasRole = (paramRole) => {
+    return async (req, res, next) => {
 
-        if(req.user.role !== role){
-            res.status(401);
-            throw new Error("User does not has the permission to access this!");
-        }else{
-            next();
+        try {
+            const userId = req.user.id;
+            let userRoles = await UserHasRole.find({ user_id: userId }).select(["role_id -_id"]).populate("role_id");
+
+            const roles = userRoles.map(userRole => userRole.role_id);
+            roles.forEach(role => {
+                if (role.name == paramRole) {
+                    next();
+                }
+            });
+            res.status(401).json({ message: "User is not authorized"});
+
+        } catch (err) {
+            console.log(err);
         }
     }
 };
 
-module.exports = authRole;
+module.exports = hasRole;

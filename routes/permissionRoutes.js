@@ -1,7 +1,7 @@
 const express = require("express");
 const { getPermissions, createPermission, updatePermission, getSinglePermission, deletePermission} = require("../controllers/permissionController");
 const validateToken = require("../middleware/validateTokenHandler");
-const authRole = require("../middleware/validateRoleHandler");
+const hasRole = require("../middleware/validateRoleHandler");
 const router = express.Router();
 
 
