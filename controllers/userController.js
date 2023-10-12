@@ -120,6 +120,62 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
 
 });
+
+
+// @desc Update User Info
+// @route PUT /api/users/:id
+// @access private
+
+
+const updateUser = asyncHandler(async (req, res) => {
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+        res.status(404);
+        throw new Error("user Not Found");
+    }
+    const { username, email, password } = req.body;
+
+    const userAlreadyExist = await User.findOne({ email: email, _id: { $ne: user.id } });
+
+
+    if (userAlreadyExist) {
+        res.status(400);
+        throw new Error("User already exist");
+    }
+
+    if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+    }
+    console.log(username);
+
+    // Extract the uploaded file path if it exists
+    // let profilePicturePath = null;
+    // if (req.files && req.files.length > 0) {
+    //     profilePicturePath = req.files[0].path;
+
+    // }
+
+    const data = {
+        username: username,
+        // email: email,
+        // password: hashedPassword,
+        // profile_picture: profilePicturePath
+    };
+    const updatedUser = await User.findByIdAndUpdate(req.params.id,
+        data,
+        { new: true });
+
+    res.status(200).json({ message: `user updated `, user: updatedUser });
+
+
+});
+
+
+
+
+
+
 // @desc Current User Info
 // @route GET /api/users/current
 // @access private
@@ -128,6 +184,20 @@ const currentUser = asyncHandler(async (req, res) => {
     res.json({ message: "logged in user", user: req.user });
 });
 
+
+// @desc GET User Info
+// @route GET /api/users/:id
+// @access private
+
+const getUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+        res.status(404);
+        throw new Error("user Not Found");
+    }
+    res.status(200).json({user:{ username: user.username, email:user.email, id:user.id, role:user.role }});
+});
 
 // @desc get Users Roles
 // @route get /api/users/roles/:id
@@ -192,4 +262,4 @@ const allUsers = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { userRegister, loginUser, logoutUser, currentUser, allUsers, getUserPermissions, getUserRoles };
+module.exports = { userRegister, loginUser, logoutUser, currentUser, allUsers, getUserPermissions, getUserRoles, updateUser, getUser };
