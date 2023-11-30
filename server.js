@@ -1,6 +1,5 @@
 const express = require("express");
 const http = require('http');
-const socketIo = require('socket.io');
 const helmet = require("helmet");
 const cors = require('cors')
 const cookieParser = require("cookie-parser");
@@ -18,10 +17,7 @@ app.use(
 app.use(cors())
 app.use(cookieParser())
 app.use(express.json())
-const server = http.createServer(app);
-const configureSockets = require('./sockets/chatSocket'); // Replace with the actual path
-configureSockets(server);
-// 
+
 
 connectDb();
 
@@ -30,10 +26,13 @@ app.use(express.json());
 
 
 app.use("/api/v1/auth", require("./routes/authRouts"))
+app.use("/api/v1/users", require("./routes/userRoutes"))
+app.use("/api/v1/doctors", require("./routes/doctorRouts"))
+app.use("/api/v1/reviews",require('./routes/reviewRouts'))
 
 app.use(errorHandlor);
 
 // Start the HTTP server
-server.listen(port, () => {
+app.listen(port, () => {
     console.log("Server is running on port " + port);
 });
